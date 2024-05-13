@@ -1,113 +1,139 @@
-import Image from "next/image";
+"use client"
+import { Input } from "@/components/ui/input"
+import { Calendar } from "@/components/ui/calendar"
+import { useState } from "react";
+import { Toaster, toast } from "react-hot-toast";
+import Card from "@/components/ui/card";
+
 
 export default function Home() {
+  const[cpm, setCpm] = useState(null);
+  const[totalbudget, setTotalBudget] = useState(null);
+  const[spentbudget, setSpentBudget] = useState(null);
+  const[adbudget, setAdBudget] = useState(null);
+  const[duration, setDuration] = useState(null);
+  
+  const [date1, setDate1] = useState(undefined);
+  const [date2, setDate2] = useState(undefined);
+
+
+  const[expectedMessages, setExpectedMessages] = useState(0);
+
+  const calculateDateDifference = (date1, date2) => {
+    if (!date1 || !date2) return "Select two dates";
+
+    const diff = Math.abs(date2.getTime() - date1.getTime()); // Absolute difference
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    // const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    // const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    // const seconds = Math.floor((diff / 1000) % 60);
+    // return `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+    return `${days}`;
+
+  }
+  const calculateMessages = () => {
+  if (cpm > 0 && duration > 0) {
+    const newAdBudget = totalbudget - spentbudget;
+    setAdBudget(newAdBudget);
+    setExpectedMessages(Math.floor(newAdBudget / cpm / duration));
+  } else {
+    setExpectedMessages(0);
+    setAdBudget(0);
+    toast("Please enter valid CPM and duration.", { icon: "⚠️" });
+  }
+};
+  const copyToClipboard = (text) =>{
+    navigator.clipboard.writeText(text);
+    toast("Days copied to clipboard", {
+      icon: "🌞",
+    });
+      // .then(() => {
+        
+      //   // Optionally add feedback (e.g., change icon, show tooltip)
+      //   console.log('Copied to clipboard!');
+      // })
+      // .catch(err => {
+      //   console.error('Failed to copy: ', err);
+      // });
+  }
+  
+  
+
+  
+  
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+    <div>
+      <div>
+        <h1 className="flex flex-col justify-center items-center m-4 gap-5 text-3xl font-bold ">Facebook Ad Message Calculator</h1>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+          <div className="m-4 flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col items-center">
+              <label> Select Your Start Date </label>
+              <Calendar
+                  mode="single"
+                  selected={date1}
+                  onSelect={setDate1}
+                  className="rounded-md border"
+              />
+            </div>
+            <div className="flex flex-col items-center">
+              <label> Select Your End Date </label>
+              <Calendar
+                  mode="single"
+                  selected={date2}
+                  onSelect={setDate2}
+                  className="rounded-md border"
+              />
+            </div>
+          </div>
+          <Toaster
+          position="top-center"
+          reverseOrder={false}
+          toastOptions={{ duration: 2000 }}
         />
+          <div className="flex flex-row items-center justify-center">
+
+              {/* <p><span className="inline-block bg-red-400/30 rounded-md px-2">Your Selected Dates are: {date1 ? date1.toString() : 'None'},  {date2 ? date2.toString() : 'None'}</span></p> */}
+              <span className="inline-block bg-red-400/30 rounded-md px-2">
+              Days Difference: {date1 && date2 ? calculateDateDifference(date1, date2) : 'Select two dates'} days
+              </span>
+              <button className="ml-2 cursor-pointer bg-black text-white rounded-xl p-2" onClick={() => {
+                const newDuration = calculateDateDifference(date1, date2);
+                setDuration(newDuration);
+              }}>
+                  Copy To Total Duration
+                </button>
+              
+          </div>
       </div>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+      <div className="flex flex-row justify-center items-center m-4 gap-5">
+        <Card>
+        <label>Cost Per Message</label>
+        <Input type="number" value={cpm} placeholder="Cost Per Message" onChange={(e)=> setCpm(parseFloat(e.target.value))} />
+        </Card>
+        <Card>
+        <label>Total Budget</label>
+        <Input type="number" value={totalbudget} placeholder="Total Budget" onChange={(e)=> setTotalBudget(parseFloat(e.target.value))}/>
+        </Card>
+        <Card>
+        <label>Spent Budget</label>
+        <Input type="number" value={spentbudget} placeholder="Spent Budget" onChange={(e)=> setSpentBudget(parseFloat(e.target.value))} />
+        </Card>
+        <Card>
+        <label>Total Duration</label>
+        <Input type="number" value={duration} placeholder="Duration In Days" onChange={(e)=> setDuration(parseFloat(e.target.value))}/>
+        </Card>
+        
       </div>
-    </main>
+      <div className="flex flex-col justify-center items-center m-4 gap-5">
+        <button onClick={calculateMessages}  className="bg-blue-500 text-white p-2 rounded">
+            Calculate
+          </button>
+          <p>Expected Messages : {expectedMessages} messages per day </p>
+      </div>
+    </div>
   );
 }
+
+
